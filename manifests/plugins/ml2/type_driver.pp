@@ -85,7 +85,8 @@ define neutron::plugins::ml2::type_driver (
   }
   elsif ($name == 'vxlan') {
     # vni_ranges and vxlan_group are required in vxlan
-    if (! $vni_ranges) or (! $vxlan_group) {
+    # MINNUS
+    if (! $vni_ranges) or (! $vxlan_group){
       fail('when vxlan is part of type_drivers, vni_ranges and vxlan_group should be given.')
     }
     # test multicast ip address (ipv4 else ipv6):
@@ -98,17 +99,27 @@ define neutron::plugins::ml2::type_driver (
       }
       /^ff[\d.]+$/: { }
       default: {
+	#MINNUS
         fail("${vxlan_group} is not valid for vxlan_group.")
       }
     }
 
     validate_vni_ranges($vni_ranges)
 
-    neutron_plugin_ml2 {
-      'ml2_type_vxlan/vxlan_group': value => $vxlan_group;
-      'ml2_type_vxlan/vni_ranges':  value => join(any2array($vni_ranges), ',');
+    if ( $vxlan_group) {
+       neutron_plugin_ml2 {
+           'ml2_type_vxlan/vxlan_group': value => $vxlan_group;
+           'ml2_type_vxlan/vni_ranges':  value => join(any2array($vni_ranges), ',');
+       }
+    }
+    else {
+       neutron_plugin_ml2 {
+           'ml2_type_vxlan/vxlan_group': ensure => absent;
+           'ml2_type_vxlan/vni_ranges':  value => join(any2array($vni_ranges), ',');
+       }
     }
   }
+
   elsif ($name == 'local') {
     warning('local type_driver is useful only for single-box, because it provides no connectivity between hosts')
   }

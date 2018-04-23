@@ -101,6 +101,7 @@ class neutron::agents::ml2::linuxbridge (
       'vxlan/tos':           value => $vxlan_tos;
       'vxlan/local_ip':      value => $local_ip;
       'vxlan/l2_population': value => $l2_population;
+      'vxlan/enable_vxlan':  value  => true;
     }
   } else {
     neutron_agent_linuxbridge {
